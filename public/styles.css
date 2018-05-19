@@ -1,0 +1,31 @@
+@font-face {
+    font-family: Funkydori;
+    src: url(/Funkydori.ttf);
+}
+
+@font-face {
+  font-family: DINRoundWeb;
+  src: url(/DINRoundWeb.woff);
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'DINRoundWeb';
+  margin-bottom: 60px;
+}
+
+.dinfont {
+  font-family: 'DINRoundWeb';
+}
+
+#root {
+    background: url('lmh-background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    height: auto;
+    min-height: 800px;
+    padding-top: 50px;
+}

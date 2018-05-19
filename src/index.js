@@ -1,9 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import registerServiceWorker from './registerServiceWorker';
+import { BrowserRouter } from 'react-router-dom'
+import Template from './containers/Template'
 
-ReactDOM.render(<div>
-		<h1>Welcome to Summerfuel Oxford 2018</h1>
-	</div>, document.getElementById('root'));
+ReactDOM.render(
+	<BrowserRouter>
+		<Template />
+	</BrowserRouter>,
+	document.getElementById('root'));
 registerServiceWorker();
