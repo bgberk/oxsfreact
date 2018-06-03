@@ -111,7 +111,6 @@ let components = {
 }
 
 const MyCalendar = props => (
-  <div>
     <BigCalendar
       style={styles} // set height of calendar IMPORTANT
       views={['week', 'agenda']} // only allow week and agenda
@@ -128,7 +127,6 @@ const MyCalendar = props => (
       drilldownView = {'agenda'} // go to agenda when day is clicked
       components={components}
     />
-  </div>
 )
 
 export default MyCalendar

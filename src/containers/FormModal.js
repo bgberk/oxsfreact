@@ -1,6 +1,33 @@
 import React from 'react'
-import { message, Form, Input, Button, DatePicker, TimePicker, Select, Modal } from 'antd'
+import { message, Form, Input, Button, DatePicker, Select, Modal } from 'antd'
 import 'antd/dist/antd.css'
+import gql from "graphql-tag"
+import { Mutation } from "react-apollo"
+
+const CREATE_EVENT = gql`
+	mutation createEvent(
+		$title: String!,
+		$start: DateTime!,
+		$end: DateTime!,
+		$type: [String!],
+		$desc: String!,
+		$location: String!,
+		$guestcount: Int!
+	) {
+	  createEvent(
+	    title: $title,
+	    start: $start,
+	    end: $end,
+	    type: $type,
+	    desc: $desc,
+	    location: $location,
+	    guestcount: $guestcount
+	  ) {
+	    id
+	  }
+	}
+`
+
 
 const styles = {
   fontFamily: 'DINRoundWeb'
@@ -64,25 +91,24 @@ const CollectionCreateForm = Form.create()(
 				        </Select>
 				      )}
 				      </FormItem>      
-				      <FormItem required={true} label="Date" >
-		          {getFieldDecorator('date', {
-		            rules: [{ required: true}],
-		          })(		      
-				        <DatePicker />
-				      )}
-				      </FormItem>
-				      <FormItem required={true} label="Starts">
+				      <FormItem required={true} label="Starts" >
 		          {getFieldDecorator('start', {
 		            rules: [{ required: true}],
 		          })(		      
-				        <TimePicker inputReadOnly={true} format="HH:mm" minuteStep={15} />
+				        <DatePicker showToday={false} 
+				        						format="MM-DD-YYYY HH:mm" 
+				        						showTime={{minuteStep: 15}} 
+				        						/>
 				      )}
 				      </FormItem>
 				      <FormItem required={true} label="Ends">
 		          {getFieldDecorator('end', {
 		            rules: [{ required: true}],
 		          })(		      
-				        <TimePicker inputReadOnly={true} format="HH:mm" minuteStep={15} />
+				        <DatePicker showToday={false} 
+				        						format="MM-DD-YYYY HH:mm" 
+				        						showTime={{minuteStep: 15}} 
+				        						/>
 				      )}
 				      </FormItem>		      
 				    </Form>
@@ -95,9 +121,14 @@ const CollectionCreateForm = Form.create()(
 );
 
 class FormModal extends React.Component {
-  state = {
-    visible: false,
-  };
+  constructor(props) {
+  	super(props);
+
+  	this.state = {
+    	visible: false,
+  	}
+  }
+
   showModal = () => {
     this.setState({ visible: true });
   }
@@ -105,33 +136,65 @@ class FormModal extends React.Component {
     this.setState({ visible: false });
   }
   handleCreate = () => {
-    const form = this.formRef.props.form;
-    form.validateFields((err, values) => {
-      if (err) {
-      	error();
-        return;
-      }
 
-      console.log('Received values of form: ', values);
-      form.resetFields();
-      this.setState({ visible: false });
-      success();
-    });
   }
+
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
+
+  sendMutation = (values) => {
+
+  }
+
   render() {
     return (
-      <div>
-        <Button type="primary" onClick={this.showModal}>New Event</Button>
-        <CollectionCreateForm
-          wrappedComponentRef={this.saveFormRef}
-          visible={this.state.visible}
-          onCancel={this.handleCancel}
-          onCreate={this.handleCreate}
-        />
-      </div>
+    	<Mutation mutation={CREATE_EVENT}>
+    		{(createEvent) => (
+    			<div>
+		        <Button type="primary" onClick={this.showModal}>New Event</Button>
+		        <CollectionCreateForm
+		          wrappedComponentRef={this.saveFormRef}
+		          visible={this.state.visible}
+		          onCancel={this.handleCancel}
+		          onCreate={e => {
+						    const form = this.formRef.props.form;
+						    form.validateFields((err, fieldsValue) => {
+						      if (err) {
+						      	error();
+						        return;
+						      };
+
+						      const values = {
+						      	...fieldsValue,
+						      	// 'start': fieldsValue['start'].toString(),
+						      	// 'end': fieldsValue['end'].toString(),
+						      	'type': fieldsValue['type'].toString().split(","),
+						      	'guestcount': 0
+						      };
+
+						      console.log('Received values of form: ', values)
+
+							    createEvent({
+							  		variables: {
+							      	start: values.start,
+							      	end: values.end,
+							      	location: values.location,
+							      	desc: values.desc,
+							      	title: values.title,
+							      	guestcount: values.guestcount,
+							      	type: values.type  			
+							  		}
+							  	})
+							    form.resetFields()
+							    this.setState({ visible: false })
+							    success()      
+						    })		          	
+		          }}
+		        />
+	      	</div>
+    		)}
+      </Mutation>
     );
   }
 }
